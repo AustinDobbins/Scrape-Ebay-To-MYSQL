@@ -8,7 +8,9 @@ page = requests.get(URL, headers=headers)
 soup = BeautifulSoup(page.content, 'html.parser')
 results = []
 clean = []
-sum = sum(map(float,clean))
+
+
+
 
 #finds all prices on the page and strips html tags
 for price in soup.findAll("span", {"class": "POSITIVE"}):
@@ -26,4 +28,8 @@ for i in results:
 for i in results:
   clean.append(float(i[1:]))
 
-print(clean)
+sum = sum(map(float,clean))
+len = len(clean)
+avg = sum / len
+
+print(avg)
