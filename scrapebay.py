@@ -1,5 +1,8 @@
 # Scrapes ebay for product search page prices of 200 products and puts them into a list 
 import requests
+import mysql.connector
+import datetime
+import locale
 from bs4 import BeautifulSoup
 
 URL = 'https://www.ebay.com/sch/i.html?_from=R40&_nkw=oneplus+6t&_sacat=0&_udlo=150&_udhi=450%22&_ipg=200&rt=nc&LH_Sold=1&LH_Complete=1'
@@ -8,6 +11,7 @@ page = requests.get(URL, headers=headers)
 soup = BeautifulSoup(page.content, 'html.parser')
 results = []
 clean = []
+date = datetime.date.today()
 
 
 
@@ -32,4 +36,27 @@ sum = sum(map(float,clean))
 len = len(clean)
 avg = sum / len
 
-print(avg)
+locale.setlocale( locale.LC_ALL, 'English_United States.1252' )
+avgPrice = locale.currency( avg, grouping = True )
+
+
+#mysql database
+mydb = mysql.connector.connect(
+    host = 'localhost',
+    user = 'root',
+    passwd = '',
+    database = 'testdb'
+)
+
+mycursor = mydb.cursor()
+
+sqlFormula = "INSERT INTO average (product_name, scrape_date, avg_sold_price) VALUES (%s, %s, %s)"
+testScrape = ('Oneplus 6t', date, avgPrice)
+
+mycursor.execute(sqlFormula, testScrape)
+
+mydb.commit()
+
+
+
+
