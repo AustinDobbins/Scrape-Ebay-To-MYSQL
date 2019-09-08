@@ -1,0 +1,1 @@
+CREATE DATABASE ebay_scraper
