@@ -18,7 +18,7 @@ CREATE TABLE ebay_scraper.scrape_data (
 
 CREATE TABLE ebay_scraper.product_data (
     data_id INT NOT NULL AUTO_INCREMENT,
-    product_title VARCHAR(100),
+    product_title VARCHAR(255),
     product_id INT NOT NULL,
     cond VARCHAR(10),
     date_sold VARCHAR(100),
