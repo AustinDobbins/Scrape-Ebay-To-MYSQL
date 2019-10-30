@@ -33,7 +33,7 @@ def scrape_page():
     for price in soup.findAll("span", {"class": "POSITIVE"}):
         priceResults.append(price.get_text(strip=True))
     
-    #finds all dates sold
+    #finds all dates sold 
     for date in soup.findAll("span", {"s-item__ended-date s-item__endedDate"}):
         dateResults.append(date.get_text(strip=True))
 
@@ -63,13 +63,14 @@ def scrape_page():
     mycursor = mydb.cursor()
 
     #insert into product table
-    query = 'DELETE FROM products WHERE product_name = ' + "'" + pn + "'"
-    mycursor.execute(query)
-    query = "INSERT INTO products (product_name) VALUES (%s)"
-    mycursor.execute(query,(pn,))
-    mydb.commit()
-    print('New product saved')
-    print ('-')
+    if URL == cleanURL + '1':
+        query = 'DELETE FROM products WHERE product_name = ' + "'" + pn + "'"
+        mycursor.execute(query)
+        query = "INSERT INTO products (product_name) VALUES (%s)"
+        mycursor.execute(query,(pn,))
+        mydb.commit()
+        print('New product saved')
+        print ('-')
 
     #pull primary_id from product table using product_name as unique key 
     query_template = """SELECT product_id FROM ebay_scraper.products WHERE product_name = '<REPLACE>'""" 
@@ -77,6 +78,13 @@ def scrape_page():
     mycursor.execute(query)
     primary_key = mycursor.fetchone()
     clean_key = (primary_key[0])
+
+    #deletes old data for matching product name 
+    if URL == cleanURL + '1':
+        delete_old_data = 'DELETE FROM product_data WHERE product_id =' + str(clean_key)
+        mycursor.execute(delete_old_data)
+        print('Any old data associated with '+ pn + ' has been deleted.')
+        print('-')
 
     #insert into scrape_data table 
     scrape_query = "INSERT INTO scrape_data (scrape_date, product_name, product_id) VALUES (%s, %s, %s)"
@@ -100,15 +108,11 @@ def scrape_page():
     #inserts data into product_data table, 1 querie for each row 
     for product_data in tupleList:
         mycursor = mydb.cursor()
-        delete_old_data = 'DELETE FROM product_data WHERE product_id =' + str(clean_key)
-        mycursor.execute(delete_old_data)
         sqlFormula = "INSERT INTO product_data (product_title, product_id, cond, date_sold, price_sold, scrape_id) VALUES (%s, %s, %s, %s, %s, %s)"
         mycursor.execute(sqlFormula, product_data)
         mydb.commit()
         print('New product_data entry saved')
         print ('-')
-
-        
         
 #calls the script to be ran once for every page that ebay has data for (as specified by user through input statement)         
 for pages_unscraped in range(int(pages_available)+1):
