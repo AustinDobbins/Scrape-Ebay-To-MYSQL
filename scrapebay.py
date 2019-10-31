@@ -111,8 +111,11 @@ def scrape_page():
         sqlFormula = "INSERT INTO product_data (product_title, product_id, cond, date_sold, price_sold, scrape_id) VALUES (%s, %s, %s, %s, %s, %s)"
         mycursor.execute(sqlFormula, product_data)
         mydb.commit()
-        print('New product_data entry saved')
-        print ('-')
+        count_query = 'SELECT COUNT(*) FROM product_data WHERE product_id = ' + str(clean_key)
+        mycursor.execute(count_query)
+        data_count = str(mycursor.fetchall())
+        for count in re.findall(r'\d{1,25}', data_count):
+            print(str(count) + ' new products saved to product_data table')
         
 #calls the script to be ran once for every page that ebay has data for (as specified by user through input statement)         
 for pages_unscraped in range(int(pages_available)+1):
