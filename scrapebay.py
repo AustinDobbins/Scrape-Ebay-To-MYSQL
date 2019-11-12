@@ -7,10 +7,10 @@ from bs4 import BeautifulSoup
 from multiprocessing import Pool
 
 # replace below 4 variables to scrape any desired product on ebay
-cleanURL = 'https://www.ebay.com/sch/i.html?_from=R40&_nkw=iphone&_sacat=0&rt=nc&LH_Sold=1&LH_Complete=1&_ipg=200&_pgn='
-pn = 'iphone'
+cleanURL = 'https://www.ebay.com/sch/i.html?_from=R40&_nkw=iphone+xs+max+&_sacat=0&LH_Sold=1&LH_Complete=1&_udlo=200&_ipg=200&_pgn='
+pn = 'iphone xs max'
 condition = 'used'
-pages_available = 50
+pages_available = 10
 
 def scrape_page(URL):
     # variables for storing/cleaning data for mysql queries
@@ -63,12 +63,11 @@ def scrape_page(URL):
     mycursor = mydb.cursor()
 
     # insert into product table
-    if URL == cleanURL + '1':
-        query = "INSERT INTO products (product_name) SELECT * FROM (SELECT" +"'"+ pn +"'"+ ") AS p WHERE NOT EXISTS (select * from products where product_name =" +"'"+ pn +"'"+ ") limit 1;"
-        mycursor.execute(query)
-        mydb.commit()
-        print('New product saved')
-        print ('-')
+    query = "INSERT IGNORE INTO products (product_name) SELECT * FROM (SELECT" +"'"+ pn +"'"+ ") AS p WHERE NOT EXISTS (select * from products where product_name =" +"'"+ pn +"'"+ ") limit 1;"
+    mycursor.execute(query)
+    mydb.commit()
+    print('New product saved')
+    print ('-')
 
     # pull primary_id from product table using product_name as unique key 
     query_template = """SELECT product_id FROM ebay_scraper.products WHERE product_name = '<REPLACE>'""" 
@@ -113,7 +112,7 @@ if __name__=='__main__':
     url_list = []
     # creates list of urls based of number of pages of data available
     for pages_unscraped in range(int(pages_available)+1):
-        URL = cleanURL + str(pages_unscraped)
+        URL = cleanURL + str(pages_unscraped) + '&rt=nc'
         if (pages_unscraped > 0):
             url_list.append(URL)
     # calls the scrape_page function on every URL in the url_list with multiprocessing
